@@ -1,11 +1,15 @@
-"""Knowledge-base retrieval: embedding recall + LLM rerank."""
+"""Knowledge-base retrieval: embedding recall + deterministic BM25 rerank."""
 
+from collections import Counter
+import math
 import os
+import re
 from difflib import SequenceMatcher
 
 from . import config, embeddings
 from .chunking import chunk_text
 
+# Kept for the legacy evidence audit. Production search no longer calls it.
 RERANK_PROMPT = """You are a relevance judge for a support knowledge base.
 
 Query: {query}
@@ -14,6 +18,8 @@ Passage: {passage}
 
 RELEVANCE: rate how relevant the passage is to the query on a scale of 0-10.
 Respond with a single integer."""
+
+TOKEN_RE = re.compile(r"[a-z0-9]+")
 
 
 def load_documents():
@@ -48,6 +54,49 @@ def dedupe(chunks):
     return kept
 
 
+def _tokens(text):
+    return TOKEN_RE.findall(text.lower())
+
+
+def rank_bm25(query, candidates, corpus):
+    """Return candidates in BM25 order, preserving dense order for score ties."""
+    if not candidates or not corpus:
+        return list(candidates)
+
+    corpus_tokens = [_tokens(document) for document in corpus]
+    document_frequency = Counter()
+    for tokens in corpus_tokens:
+        document_frequency.update(set(tokens))
+
+    average_length = sum(len(tokens) for tokens in corpus_tokens) / float(len(corpus_tokens))
+    average_length = average_length or 1.0
+    query_terms = list(dict.fromkeys(_tokens(query)))
+    document_count = len(corpus_tokens)
+
+    def score(document):
+        tokens = _tokens(document)
+        frequencies = Counter(tokens)
+        length_ratio = len(tokens) / average_length
+        total = 0.0
+        for term in query_terms:
+            frequency = frequencies[term]
+            if not frequency:
+                continue
+            containing = document_frequency[term]
+            inverse_frequency = math.log(
+                1.0 + (document_count - containing + 0.5) / (containing + 0.5)
+            )
+            denominator = frequency + config.BM25_K1 * (
+                1.0 - config.BM25_B + config.BM25_B * length_ratio
+            )
+            total += inverse_frequency * frequency * (config.BM25_K1 + 1.0) / denominator
+        return total
+
+    scored = [(score(candidate), candidate) for candidate in candidates]
+    scored.sort(key=lambda row: row[0], reverse=True)
+    return [candidate for _, candidate in scored]
+
+
 def search(llm, query, k=None):
     k = k or config.TOP_K
     index = build_index()
@@ -57,15 +106,5 @@ def search(llm, query, k=None):
     scored.sort(key=lambda x: x[0], reverse=True)
     candidates = [chunk for _, chunk in scored[: config.RERANK_CANDIDATES]]
     candidates = dedupe(candidates)
-
-    reranked = []
-    for chunk in candidates:
-        raw = llm.complete(RERANK_PROMPT.format(query=query, passage=chunk))
-        try:
-            score = int(raw.strip().split()[0])
-        except (ValueError, IndexError):
-            score = 0
-        reranked.append((score, chunk))
-    reranked.sort(key=lambda x: x[0], reverse=True)
-
-    return [chunk for _, chunk in reranked][:k]
+    reranked = rank_bm25(query, candidates, [chunk for chunk, _ in index])
+    return reranked[:k]

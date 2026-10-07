@@ -4,6 +4,8 @@ import os
 CHUNK_SIZE = 800
 TOP_K = 4
 RERANK_CANDIDATES = 12
+BM25_K1 = 1.5
+BM25_B = 0.75
 
 # prompts
 MAX_PROMPT_CHARS = 12000  # keep prompts under the model limit

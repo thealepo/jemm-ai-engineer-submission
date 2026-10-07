@@ -1,5 +1,10 @@
 # AI Engineer assessment — Solstice Support Agent
 
+> **Candidate submission by Alex Sanchez.** Start with
+> [`SUBMISSION.md`](SUBMISSION.md) for implemented changes, verified results,
+> reproduction commands, and known limitations. The original supplied
+> baseline is preserved at the `original-baseline` tag.
+
 A reverse-engineering challenge for AI Engineer candidates. You get a small,
 runnable agentic AI system; your job is to figure out how it works, what's
 wrong with it, and how you'd fix it.

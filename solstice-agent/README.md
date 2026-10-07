@@ -34,7 +34,7 @@ helpdesk/
   agent.py       orchestration: route -> tool -> answer
   router.py      picks a tool for each message
   tools.py       search_kb, lookup_ticket, list_user_tickets, invoice_status
-  retrieval.py   embedding recall + LLM rerank over data/kb/
+  retrieval.py   embedding recall + deterministic BM25 rerank over data/kb/
   chunking.py    document chunking
   embeddings.py  embedding client
   memory.py      conversation history + auto-summarization
