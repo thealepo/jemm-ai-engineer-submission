@@ -1,0 +1,190 @@
+[
+  {
+    "id": "kb_version_history_control",
+    "kind": "single_turn",
+    "turns": [
+      {
+        "message": "How long is version history kept on the Starter plan?",
+        "expect": {
+          "route": "search_kb",
+          "context": {"exact_values": ["90"], "contains_all": ["days", "Starter", "Pro"]},
+          "answer": {"exact_values": ["90"], "contains_all": ["days", "Starter", "Pro"]}
+        }
+      }
+    ]
+  },
+  {
+    "id": "kb_pro_price",
+    "kind": "single_turn",
+    "turns": [
+      {
+        "message": "How much does the Pro plan cost per user per month?",
+        "expect": {
+          "route": "search_kb",
+          "context": {"exact_values": ["$18"], "contains_all": ["Pro plan", "per user per month"]},
+          "answer": {"exact_values": ["$18"], "contains_all": ["per user", "month"], "contains_none": ["$9"]}
+        }
+      }
+    ]
+  },
+  {
+    "id": "kb_jira_direction",
+    "kind": "single_turn",
+    "turns": [
+      {
+        "message": "Is the Jira integration two-way?",
+        "expect": {
+          "route": "search_kb",
+          "context": {"contains_all": ["one-way", "read-only"]},
+          "answer": {"contains_all": ["one-way", "read-only"], "contains_none": ["two-way sync is available", "writable cards"]}
+        }
+      }
+    ]
+  },
+  {
+    "id": "kb_mobile_biometric_lock",
+    "kind": "single_turn",
+    "turns": [
+      {
+        "message": "After how long in the background does the mobile app's biometric lock engage?",
+        "expect": {
+          "route": "search_kb",
+          "context": {"exact_values": ["60"], "contains_all": ["seconds", "background"]},
+          "answer": {"exact_values": ["60"], "contains_all": ["seconds", "background"]}
+        }
+      }
+    ]
+  },
+  {
+    "id": "kb_open_support_ticket",
+    "kind": "single_turn",
+    "turns": [
+      {
+        "message": "How do I open a support ticket?",
+        "expect": {
+          "route": "search_kb",
+          "context": {"contains_all": ["Contact support", "help@solstice.app"]},
+          "answer": {"contains_any": ["Contact support", "help@solstice.app"]}
+        }
+      }
+    ]
+  },
+  {
+    "id": "tool_ticket_lookup",
+    "kind": "single_turn",
+    "turns": [
+      {
+        "message": "What is the status and priority of ticket TKT-1001?",
+        "expect": {
+          "route": "lookup_ticket",
+          "context": {"exact_values": ["TKT-1001"], "contains_all": ["open", "P1"]},
+          "answer": {"exact_values": ["TKT-1001"], "contains_all": ["open", "P1"]}
+        }
+      }
+    ]
+  },
+  {
+    "id": "tool_invoice_lookup",
+    "kind": "single_turn",
+    "turns": [
+      {
+        "message": "What is the status and amount of invoice INV-2093?",
+        "expect": {
+          "route": "invoice_status",
+          "context": {"exact_values": ["INV-2093", "1728"], "contains_all": ["past_due"]},
+          "answer": {"exact_values": ["INV-2093", "1728"], "contains_all": ["past_due"]}
+        }
+      }
+    ]
+  },
+  {
+    "id": "tool_list_tickets_by_email",
+    "kind": "single_turn",
+    "turns": [
+      {
+        "message": "List the support tickets filed by dana@corp.example.",
+        "expect": {
+          "route": "list_user_tickets",
+          "context": {"exact_values": ["TKT-1001", "TKT-1004"]},
+          "answer": {"exact_values": ["TKT-1001", "TKT-1004"]}
+        }
+      }
+    ]
+  },
+  {
+    "id": "tool_missing_invoice_id",
+    "kind": "single_turn",
+    "turns": [
+      {
+        "message": "Can you check the status of my invoice?",
+        "expect": {
+          "route": "invoice_status",
+          "context": {"empty": true},
+          "answer": {
+            "contains_any": ["invoice ID", "which invoice", "provide the invoice"],
+            "contains_none": ["supported on all plans", "within 24 hours"]
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "multi_invoice_followup",
+    "kind": "multi_turn",
+    "turns": [
+      {
+        "message": "What is the status and amount of invoice INV-2093?",
+        "expect": {
+          "route": "invoice_status",
+          "context": {"exact_values": ["INV-2093", "1728"], "contains_all": ["past_due"]},
+          "answer": {"exact_values": ["INV-2093"], "contains_all": ["past_due"]}
+        }
+      },
+      {
+        "message": "How much was it, and has it been paid?",
+        "expect": {
+          "route": "invoice_status",
+          "context": {"exact_values": ["INV-2093", "1728"], "contains_all": ["past_due"]},
+          "answer": {"exact_values": ["1728"], "contains_all": ["past_due"]}
+        }
+      }
+    ]
+  },
+  {
+    "id": "multi_ticket_followup",
+    "kind": "multi_turn",
+    "turns": [
+      {
+        "message": "What is the status and last update of ticket TKT-1001?",
+        "expect": {
+          "route": "lookup_ticket",
+          "context": {"exact_values": ["TKT-1001"], "contains_all": ["open"]},
+          "answer": {"exact_values": ["TKT-1001"], "contains_all": ["open"]}
+        }
+      },
+      {
+        "message": "When was it last updated?",
+        "expect": {
+          "route": "lookup_ticket",
+          "context": {"exact_values": ["TKT-1001", "2026-09-10"]},
+          "answer": {"exact_values": ["2026-09-10"]}
+        }
+      }
+    ]
+  },
+  {
+    "id": "multi_plan_followup",
+    "kind": "multi_turn",
+    "turns": [
+      {"message": "Our workspace uses the Pro plan."},
+      {
+        "message": "What is our monthly price per user?",
+        "expect": {
+          "route": "search_kb",
+          "context": {"exact_values": ["$18"], "contains_all": ["Pro plan"]},
+          "answer": {"exact_values": ["$18"], "contains_all": ["per user", "month"], "contains_none": ["$9"]}
+        }
+      }
+    ]
+  }
+]

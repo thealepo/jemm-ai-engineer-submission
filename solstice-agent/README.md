@@ -15,7 +15,8 @@ No dependencies — Python 3.9+ standard library only.
 
 ```
 python scripts/demo.py        # scripted 14-turn customer session (writes traces/)
-python -m eval.run_eval       # accuracy eval over data/eval_set.json
+python -m eval.run_eval       # clean, stage-aware deterministic evaluation
+python -m eval.run_legacy_eval  # contaminated legacy score (comparison only)
 ```
 
 Interactive:
@@ -42,13 +43,16 @@ data/
   kb/            help-center articles (the knowledge base)
   tickets.json   support tickets fixture
   invoices.json  invoices fixture
-  eval_set.json  eval questions with reference answers
-eval/run_eval.py accuracy eval
+  eval_cases.json clean single- and multi-turn evaluation scenarios
+  eval_set.json  legacy questions with reference answers
+eval/run_eval.py clean stage-aware evaluator
+eval/run_legacy_eval.py preserved contaminated legacy evaluator
 scripts/demo.py  scripted customer session
 ```
 
 ## Status
 
-Eval accuracy is in decent shape (see `eval/run_eval.py`). Known rough edges:
-long chat sessions get slow, and customers occasionally report answers that
-don't match our docs — haven't had time to dig in.
+The clean evaluator reports deterministic assertion coverage separately for
+routing, final KB selection, record tools, and answers. It is deliberately not
+labeled as general semantic accuracy. The preserved legacy evaluator exposes
+references to the agent and must not be used as evidence of customer quality.

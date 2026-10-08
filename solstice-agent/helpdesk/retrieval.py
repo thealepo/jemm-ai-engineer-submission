@@ -68,5 +68,4 @@ def search(llm, query, k=None):
         reranked.append((score, chunk))
     reranked.sort(key=lambda x: x[0], reverse=True)
 
-    # the top passage is almost always the doc's title/header block — skip it
-    return [chunk for _, chunk in reranked][1 : k + 1]
+    return [chunk for _, chunk in reranked][:k]
