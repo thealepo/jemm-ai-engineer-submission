@@ -2,6 +2,10 @@
 
 Alex Eduardo Sanchez
 
+## Presentation
+
+[View or download the final presentation (PDF)](presentation/Jemm_Tec_Competition.pdf)
+
 ## Fastest review path
 
 ```bash
